@@ -38,6 +38,7 @@ type Config struct {
 	Probe   ProbeConfig
 	Metrics MetricsConfig
 	Log     LogConfig
+	Version bool
 }
 
 // WebConfig controls the exporter HTTP server.
@@ -182,6 +183,7 @@ func Load(args []string) (Config, error) {
 			Emoji:  ko.String("log.emoji"),
 			Color:  ko.String("log.color"),
 		},
+		Version: ko.Bool("version"),
 	}
 	if err := config.Validate(); err != nil {
 		return Config{}, err
