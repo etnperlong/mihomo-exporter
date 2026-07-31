@@ -1,8 +1,8 @@
-# Grafana Dashboard 与告警
+# Grafana 仪表板与告警
 
 [English](dashboards.md)
 
-## Import
+## 导入
 
 在 Grafana 中导入 [../dashboards/mihomo-exporter.json](../dashboards/mihomo-exporter.json)，为 `datasource` 选择 Prometheus data source，然后保存 dashboard。默认时间范围为六小时，每分钟刷新一次。
 
@@ -17,7 +17,7 @@
 
 内部变量 `job` 默认值为 `mihomo-exporter`，用于限定 exporter-online panel。当 Prometheus scrape job 使用其他名称时，请修改它。
 
-## Alerts
+## 告警
 
 将 [../dashboards/alerts.yaml](../dashboards/alerts.yaml) 作为 Prometheus rule groups 加载，或在 Grafana Alerting 中重建这些规则。文件包含：
 
@@ -32,7 +32,7 @@
 
 当 scrape job 使用其他名称时，请调整 `up{job="mihomo-exporter"}` selector，并根据本地 notification policy 路由告警 label 和 annotation。
 
-## Why Metrics Can Be Absent
+## 指标为何可能缺失
 
 `mihomo_proxy_available == 0` 用于检测已 probe 且判定不可用的代理，无法检测缺失的 series。第一次 slow probe 前、结果超过 `probe.staleness` 后，或当前 snapshot 没有符合条件的代理时，不会暴露 availability 和 delay series。因此，长期 Mihomo 或 slow-probe 故障可能导致没有新鲜 availability series。
 

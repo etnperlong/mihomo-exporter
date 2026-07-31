@@ -2,7 +2,7 @@
 
 [English](installation.md)
 
-## Release Binary
+## 发布二进制文件
 
 Release 压缩包发布在 [GitHub Releases](https://github.com/etnperlong/mihomo-exporter/releases)。每个压缩包包含 `mihomo-exporter` 和 `LICENSE`；安装前请使用随附的 `checksums.txt` 验证。
 

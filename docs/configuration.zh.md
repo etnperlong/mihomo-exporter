@@ -32,15 +32,15 @@
 
 `--metrics.enable-connections` 可以接受并保存，但目前是预留项：不会采集或暴露连接指标。
 
-## Validation
+## 配置校验
 
 启动会拒绝以下配置：没有 `http` 或 `https` scheme 及 host 的 API URL；非正数的 shutdown、API、probe、interval 或 staleness duration；`probe.slow_interval < probe.test_timeout`；`probe.staleness <= probe.slow_interval`；`probe.concurrency < 1`；以及无效的 `probe.exclude_names` 正则表达式。HTTP server 还要求 `web.telemetry_path` 以 `/` 开头。
 
-## Secrets
+## 密钥保护
 
 将 `mihomo.secret` 放在受保护的文件或 `MIHOMO_EXPORTER_MIHOMO_SECRET` 中，不要放入仓库、镜像层、命令历史或 dashboard。配置类型在结构化日志或格式化时会将该值脱敏为 `REDACTED`；脱敏不能使已泄露的文件变得安全。请限制配置文件权限，例如设为 `0600`。
 
-## Logging
+## 日志
 
 `log.level` 接受 Zap level，例如 `debug`、`info`、`warn`、`error`、`dpanic`、`panic` 和 `fatal`。
 
