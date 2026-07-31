@@ -11,6 +11,7 @@ require (
 	github.com/knadh/koanf/v2 v2.3.5
 	github.com/spf13/pflag v1.0.10
 	go.uber.org/zap v1.28.0
+	golang.org/x/sync v0.22.0
 	golang.org/x/term v0.45.0
 )
 
