@@ -24,6 +24,7 @@ import (
 const appName = "mihomo-exporter"
 
 var (
+	version          = "(devel)"
 	errProberStopped = errors.New("prober stopped unexpectedly")
 	errServerStopped = errors.New("HTTP server stopped unexpectedly")
 )
@@ -161,6 +162,10 @@ func newLoggingOptions(logConfig config.LogConfig) (logging.Options, error) {
 }
 
 func buildVersion() string {
+	if version != "" && version != "(devel)" {
+		return version
+	}
+
 	if buildInfo, ok := debug.ReadBuildInfo(); ok && buildInfo.Main.Version != "" {
 		return buildInfo.Main.Version
 	}

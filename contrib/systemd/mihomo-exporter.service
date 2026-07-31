@@ -1,0 +1,18 @@
+[Unit]
+Description=Mihomo Prometheus exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+DynamicUser=true
+ExecStart=/usr/local/bin/mihomo-exporter --config /etc/mihomo-exporter/config.yaml
+Restart=on-failure
+RestartSec=5s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target

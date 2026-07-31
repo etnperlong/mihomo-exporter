@@ -1,0 +1,59 @@
+version: 2
+
+project_name: mihomo-exporter
+
+builds:
+  - id: mihomo-exporter
+    main: ./cmd/mihomo-exporter
+    binary: mihomo-exporter
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    tags:
+      - netgo
+      - osusergo
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+      - mipsle
+    gomips:
+      - softfloat
+      - hardfloat
+    ignore:
+      - goos: darwin
+        goarch: mipsle
+
+archives:
+  - id: default
+    ids:
+      - mihomo-exporter
+    formats:
+      - tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Mips }}_{{ . }}{{ end }}"
+    files:
+      - LICENSE*
+
+checksum:
+  name_template: checksums.txt
+
+dockers_v2:
+  - id: ghcr
+    ids:
+      - mihomo-exporter
+    dockerfile: Dockerfile
+    images:
+      - "{{ .Env.IMAGE }}"
+    tags:
+      - "{{ .Version }}"
+      - latest
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    flags:
+      - --target=release
