@@ -1,0 +1,14 @@
+{
+  "providers": {
+    "example-provider": {
+      "name": "example-provider",
+      "type": "Proxy",
+      "vehicleType": "HTTP",
+      "testUrl": "https://health.example/generate_204",
+      "expectedStatus": "204",
+      "updatedAt": "2026-07-31T12:00:00Z",
+      "subscriptionInfo": {"upload": 1, "download": 2, "total": 3, "expire": 4},
+      "proxies": []
+    }
+  }
+}

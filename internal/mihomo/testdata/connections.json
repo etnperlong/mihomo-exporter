@@ -1,0 +1,24 @@
+{
+  "downloadTotal": 200,
+  "uploadTotal": 100,
+  "connections": [{
+    "id": "connection-id",
+    "metadata": {
+      "network": "tcp",
+      "type": "HTTP",
+      "sourceIP": "192.0.2.1",
+      "destinationIP": "198.51.100.1",
+      "sourcePort": "12345",
+      "destinationPort": "443",
+      "host": "example.test",
+      "dnsMode": "normal",
+      "processPath": "/usr/bin/example"
+    },
+    "upload": 10,
+    "download": 20,
+    "start": "2026-07-31T12:00:00Z",
+    "chains": ["GLOBAL", "example-ss"],
+    "rule": "MATCH",
+    "rulePayload": ""
+  }]
+}

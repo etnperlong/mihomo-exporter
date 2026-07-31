@@ -1,0 +1,18 @@
+{
+  "proxies": {
+    "example-ss": {
+      "name": "example-ss",
+      "type": "Shadowsocks",
+      "alive": true,
+      "history": [{"time": "2026-07-31T12:00:00Z", "delay": 220}],
+      "extra": {
+        "https://health.example/generate_204": {
+          "alive": true,
+          "history": [{"time": "2026-07-31T12:01:00Z", "delay": 120}]
+        }
+      },
+      "udp": true,
+      "provider-name": "example-provider"
+    }
+  }
+}
