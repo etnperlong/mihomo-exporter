@@ -107,6 +107,7 @@ func (p *Prober) Run(ctx context.Context) error {
 
 // ProbeFast performs one topology probe and atomically publishes its result.
 func (p *Prober) ProbeFast(ctx context.Context) error {
+	started := time.Now()
 	var (
 		version   mihomo.Version
 		proxies   map[string]mihomo.Proxy
@@ -168,6 +169,7 @@ func (p *Prober) ProbeFast(ctx context.Context) error {
 			next.Fast.Providers = cloneProviders(providers)
 		}
 		next.Fast.Connected = connected
+		next.Fast.ProbeDuration = now.Sub(started)
 		if connected {
 			next.Fast.LastConnected = now
 		}
@@ -180,23 +182,24 @@ func (p *Prober) ProbeFast(ctx context.Context) error {
 
 // ProbeSlow performs one health-check and fallback-delay probe iteration.
 func (p *Prober) ProbeSlow(ctx context.Context) error {
+	started := time.Now()
 	providers, err := p.api.Providers(ctx)
 	if err != nil {
-		p.recordSlowFailure("providers")
+		p.recordSlowFailure("providers", time.Since(started))
 
 		return fmt.Errorf("get providers before health checks: %w", err)
 	}
 
-	healthErrors := p.healthCheckProviders(ctx, providers)
+	healthChecks, healthErrors := p.healthCheckProviders(ctx, providers)
 	updatedProviders, providerErr := p.api.Providers(ctx)
 	if providerErr != nil {
-		p.recordSlowFailure("providers")
+		p.recordSlowFailure("providers", time.Since(started))
 
 		return fmt.Errorf("get providers after health checks: %w", providerErr)
 	}
 	allProxies, proxyErr := p.api.Proxies(ctx)
 	if proxyErr != nil {
-		p.recordSlowFailure("proxies")
+		p.recordSlowFailure("proxies", time.Since(started))
 
 		return fmt.Errorf("get proxies for fallback probes: %w", proxyErr)
 	}
@@ -214,8 +217,10 @@ func (p *Prober) ProbeSlow(ctx context.Context) error {
 		next.Nodes = nodes
 		next.Slow.Errors = cloneCounters(current.Slow.Errors)
 		next.Slow.UnknownTypes = cloneCounters(current.Slow.UnknownTypes)
+		next.Slow.HealthChecks = healthChecks
 		next.Slow.FallbackTotal = current.Slow.FallbackTotal + uint64(len(fallbackNodes))
 		next.Slow.Connected = len(allErrors) == 0
+		next.Slow.ProbeDuration = now.Sub(started)
 		if next.Slow.Connected {
 			next.Slow.LastSuccessful = now
 		}
@@ -295,7 +300,7 @@ func (p *Prober) probeSlowAndLog(ctx context.Context) {
 	}
 }
 
-func (p *Prober) healthCheckProviders(ctx context.Context, providers map[string]mihomo.Provider) []probeError {
+func (p *Prober) healthCheckProviders(ctx context.Context, providers map[string]mihomo.Provider) (map[string]ProviderHealthSnapshot, []probeError) {
 	names := make([]string, 0, len(providers))
 	for name, provider := range providers {
 		if healthCheckable(provider.VehicleType) {
@@ -305,27 +310,35 @@ func (p *Prober) healthCheckProviders(ctx context.Context, providers map[string]
 	sort.Strings(names)
 
 	var (
-		group  errgroup.Group
-		mutex  sync.Mutex
-		errors []probeError
+		group   errgroup.Group
+		mutex   sync.Mutex
+		errors  []probeError
+		results = make(map[string]ProviderHealthSnapshot, len(names))
 	)
 	group.SetLimit(p.config.Concurrency)
 	for _, name := range names {
 		group.Go(func() error {
+			started := time.Now()
 			if err := p.api.ProviderHealthCheck(ctx, name); err != nil {
 				mutex.Lock()
 				errors = append(errors, probeError{collector: "provider_healthcheck", err: fmt.Errorf("health check provider %q: %w", name, err)})
+				results[name] = ProviderHealthSnapshot{Duration: time.Since(started)}
 				mutex.Unlock()
+
+				return nil
 			}
+			mutex.Lock()
+			results[name] = ProviderHealthSnapshot{Duration: time.Since(started), Success: true}
+			mutex.Unlock()
 
 			return nil
 		})
 	}
 	if err := group.Wait(); err != nil {
-		return append(errors, probeError{collector: "provider_healthcheck", err: fmt.Errorf("wait for provider health checks: %w", err)})
+		return results, append(errors, probeError{collector: "provider_healthcheck", err: fmt.Errorf("wait for provider health checks: %w", err)})
 	}
 
-	return errors
+	return results, errors
 }
 
 func (p *Prober) providerNodes(providers map[string]mihomo.Provider, now time.Time) (map[string]NodeSnapshot, map[string]struct{}) {
@@ -422,10 +435,11 @@ func (p *Prober) shouldProbe(proxy mihomo.Proxy) bool {
 	return !excluded
 }
 
-func (p *Prober) recordSlowFailure(collector string) {
+func (p *Prober) recordSlowFailure(collector string, duration time.Duration) {
 	p.store.update(func(current Snapshot) Snapshot {
 		next := current
 		next.Slow.Connected = false
+		next.Slow.ProbeDuration = duration
 		next.Slow.Errors = cloneCounters(current.Slow.Errors)
 		next.Slow.Errors[collector]++
 

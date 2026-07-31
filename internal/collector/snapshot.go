@@ -21,6 +21,7 @@ type FastSnapshot struct {
 	Providers     map[string]mihomo.Provider
 	Connected     bool
 	LastConnected time.Time
+	ProbeDuration time.Duration
 	Errors        map[string]uint64
 }
 
@@ -28,9 +29,17 @@ type FastSnapshot struct {
 type SlowSnapshot struct {
 	Connected      bool
 	LastSuccessful time.Time
+	ProbeDuration  time.Duration
 	Errors         map[string]uint64
 	FallbackTotal  uint64
 	UnknownTypes   map[string]uint64
+	HealthChecks   map[string]ProviderHealthSnapshot
+}
+
+// ProviderHealthSnapshot is the outcome of a provider health check.
+type ProviderHealthSnapshot struct {
+	Duration time.Duration
+	Success  bool
 }
 
 // NodeSnapshot is the latest probe result for one outbound proxy.

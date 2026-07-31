@@ -23,6 +23,7 @@ func NewStore() *Store {
 		Slow: SlowSnapshot{
 			Errors:       make(map[string]uint64),
 			UnknownTypes: make(map[string]uint64),
+			HealthChecks: make(map[string]ProviderHealthSnapshot),
 		},
 		Nodes: make(map[string]NodeSnapshot),
 	})

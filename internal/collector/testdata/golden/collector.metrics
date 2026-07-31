@@ -1,0 +1,53 @@
+# HELP mihomo_exporter_last_success_timestamp_seconds Unix timestamp of the latest successful probe loop.
+# TYPE mihomo_exporter_last_success_timestamp_seconds gauge
+mihomo_exporter_last_success_timestamp_seconds{loop="fast"} 4.1024448e+09
+mihomo_exporter_last_success_timestamp_seconds{loop="slow"} 4.1024448e+09
+# HELP mihomo_exporter_probe_duration_seconds Duration of the latest probe loop.
+# TYPE mihomo_exporter_probe_duration_seconds gauge
+mihomo_exporter_probe_duration_seconds{loop="fast"} 0.125
+mihomo_exporter_probe_duration_seconds{loop="slow"} 0.25
+# HELP mihomo_exporter_probe_fallback_total Total proxies measured by fallback probes.
+# TYPE mihomo_exporter_probe_fallback_total counter
+mihomo_exporter_probe_fallback_total 3
+# HELP mihomo_exporter_scrape_errors_total Total Mihomo scrape errors.
+# TYPE mihomo_exporter_scrape_errors_total counter
+mihomo_exporter_scrape_errors_total{collector="provider_healthcheck"} 2
+mihomo_exporter_scrape_errors_total{collector="version"} 1
+# HELP mihomo_exporter_unknown_proxy_type_total Total unknown proxy types encountered.
+# TYPE mihomo_exporter_unknown_proxy_type_total counter
+mihomo_exporter_unknown_proxy_type_total{type="Novel"} 4
+# HELP mihomo_provider_healthcheck_duration_seconds Duration of the latest provider health check.
+# TYPE mihomo_provider_healthcheck_duration_seconds gauge
+mihomo_provider_healthcheck_duration_seconds{provider="primary"} 0.05
+# HELP mihomo_provider_healthcheck_success Whether the latest provider health check succeeded.
+# TYPE mihomo_provider_healthcheck_success gauge
+mihomo_provider_healthcheck_success{provider="primary"} 1
+# HELP mihomo_provider_info Provider metadata.
+# TYPE mihomo_provider_info gauge
+mihomo_provider_info{provider="primary",test_url="https://example.test/204",type="Proxy",vehicle_type="HTTP"} 1
+# HELP mihomo_provider_proxy_available_count Number of available proxies in the provider.
+# TYPE mihomo_provider_proxy_available_count gauge
+mihomo_provider_proxy_available_count{provider="primary"} 1
+# HELP mihomo_provider_proxy_count Number of proxies in the provider.
+# TYPE mihomo_provider_proxy_count gauge
+mihomo_provider_proxy_count{provider="primary"} 2
+# HELP mihomo_provider_updated_timestamp_seconds Unix timestamp of the provider update.
+# TYPE mihomo_provider_updated_timestamp_seconds gauge
+mihomo_provider_updated_timestamp_seconds{provider="primary"} 4.1024448e+09
+# HELP mihomo_proxy_available Whether the proxy is available.
+# TYPE mihomo_proxy_available gauge
+mihomo_proxy_available{name="failed",provider="primary",type="Trojan"} 0
+mihomo_proxy_available{name="healthy",provider="primary",type="Vmess"} 1
+# HELP mihomo_proxy_delay_milliseconds Latest successful proxy delay in milliseconds.
+# TYPE mihomo_proxy_delay_milliseconds gauge
+mihomo_proxy_delay_milliseconds{name="healthy",provider="primary",type="Vmess"} 42
+# HELP mihomo_proxy_last_probe_timestamp_seconds Unix timestamp of the latest proxy probe.
+# TYPE mihomo_proxy_last_probe_timestamp_seconds gauge
+mihomo_proxy_last_probe_timestamp_seconds{name="failed",provider="primary",type="Trojan"} 4.1024448e+09
+mihomo_proxy_last_probe_timestamp_seconds{name="healthy",provider="primary",type="Vmess"} 4.1024448e+09
+# HELP mihomo_up Whether the latest fast probe connected to Mihomo.
+# TYPE mihomo_up gauge
+mihomo_up 1
+# HELP mihomo_version_info Mihomo version information.
+# TYPE mihomo_version_info gauge
+mihomo_version_info{meta="true",version="v1.2.3"} 1
