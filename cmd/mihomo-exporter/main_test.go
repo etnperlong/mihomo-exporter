@@ -11,15 +11,10 @@ func TestRun(t *testing.T) {
 
 	tests := map[string]struct {
 		args    []string
-		want    string
 		wantErr bool
 	}{
-		"default name": {args: nil, want: "Hello, World!\n"},
-		"explicit name": {
-			args: []string{"-name", "Alice"},
-			want: "Hello, Alice!\n",
-		},
-		"unknown flag": {args: []string{"-nope"}, wantErr: true},
+		"no arguments":         {args: nil},
+		"unexpected arguments": {args: []string{"-nope"}, wantErr: true},
 	}
 
 	for name, tt := range tests {
@@ -41,8 +36,8 @@ func TestRun(t *testing.T) {
 				t.Fatalf("run(%q) returned unexpected error: %v", tt.args, err)
 			}
 
-			if got := out.String(); got != tt.want {
-				t.Errorf("run(%q) wrote %q, want %q", tt.args, got, tt.want)
+			if got := out.String(); got != "" {
+				t.Errorf("run(%q) wrote %q, want empty output", tt.args, got)
 			}
 		})
 	}

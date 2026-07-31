@@ -1,3 +1,3 @@
-module github.com/etnperlong/go-scaffold
+module github.com/etnperlong/mihomo-exporter
 
 go 1.26

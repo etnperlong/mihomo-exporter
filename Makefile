@@ -1,7 +1,7 @@
 # Single source of truth for every development command.
 # README, CI, and Git hooks must call these targets instead of duplicating flags.
 
-BINARY      := scaffold
+BINARY      := mihomo-exporter
 CMD_PACKAGE := ./cmd/$(BINARY)
 BIN_DIR     := bin
 TOOLS       := -modfile=tools/go.mod
