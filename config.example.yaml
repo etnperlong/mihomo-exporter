@@ -1,0 +1,31 @@
+# Copy this file to a protected location such as /etc/mihomo-exporter/config.yaml.
+# Keep real API secrets out of version control.
+web:
+  listen_address: ":9878"
+  telemetry_path: "/metrics"
+  shutdown_timeout: 10s
+
+mihomo:
+  api_url: "http://127.0.0.1:9090"
+  secret: "REPLACE_WITH_YOUR_MIHOMO_SECRET"
+  timeout: 10s
+
+probe:
+  test_url: "https://www.gstatic.com/generate_204"
+  test_timeout: 5s
+  fast_interval: 15s
+  slow_interval: 1m
+  concurrency: 8
+  staleness: 5m
+  exclude_types: ""
+  exclude_names: ""
+
+metrics:
+  # Reserved for a future connection-metrics collector; no connection metrics are emitted today.
+  enable_connections: false
+
+log:
+  level: "info"
+  format: "auto"
+  emoji: "auto"
+  color: "auto"
