@@ -1,0 +1,27 @@
+#!/bin/sh
+# Fast local feedback before a commit. CI remains the authoritative gate.
+# Enable with: make setup   (sets core.hooksPath to .githooks)
+#
+# Note: this checks the WORKING TREE, not the staged snapshot. With partially
+# staged changes it may pass on unstaged edits; CI validates the real commit.
+#
+# Deliberately excluded because they are too slow for every commit:
+#   race detector, govulncheck, cross-platform builds.
+
+set -eu
+
+# Nothing staged in Go or module files means nothing to verify here.
+STAGED="$(git diff --cached --name-only --diff-filter=ACMR |
+	grep -E '\.go$|^go\.(mod|sum)$|^tools/go\.(mod|sum)$' || true)"
+
+if [ -z "$STAGED" ]; then
+	exit 0
+fi
+
+echo "pre-commit: checking formatting"
+make fmt-check
+
+echo "pre-commit: running tests"
+make test
+
+echo "pre-commit: ok"

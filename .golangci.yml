@@ -1,0 +1,154 @@
+# golangci-lint v2 configuration.
+# Reference: https://golangci-lint.run/docs/configuration/file/
+version: "2"
+
+run:
+  # Include _test.go files in analysis.
+  tests: true
+
+linters:
+  # Start from the curated default set instead of enabling everything.
+  default: standard
+  enable:
+    # Correctness and safety
+    - bodyclose
+    - contextcheck
+    - durationcheck
+    - errorlint
+    - exhaustive
+    - makezero
+    - nilerr
+    - noctx
+    - rowserrcheck
+    - sqlclosecheck
+    - copyloopvar
+
+    # Error handling discipline
+    - err113
+    - errname
+    - wrapcheck
+
+    # API and package design
+    - containedctx
+    - forcetypeassert
+    - interfacebloat
+    - predeclared
+    - reassign
+
+    # Readability
+    - dupword
+    - godot
+    - misspell
+    - nakedret
+    - nolintlint
+    - revive
+    - unconvert
+    - usestdlibvars
+    - whitespace
+
+    # Test quality
+    - testifylint
+    - thelper
+    - tparallel
+
+    # Performance
+    - perfsprint
+    - prealloc
+
+    # Security
+    - gosec
+
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+
+    exhaustive:
+      default-signifies-exhaustive: true
+
+    govet:
+      enable-all: true
+      disable:
+        # Struct field alignment is noisy and rarely worth the churn.
+        - fieldalignment
+
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+      allow-unused: false
+
+    revive:
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+        - name: error-naming
+        - name: error-return
+        - name: error-strings
+        - name: errorf
+        - name: exported
+        - name: increment-decrement
+        - name: indent-error-flow
+        - name: package-comments
+        - name: range
+        - name: receiver-naming
+        - name: redefines-builtin-id
+        - name: superfluous-else
+        - name: time-naming
+        - name: unexported-return
+        - name: unreachable-code
+        - name: unused-parameter
+        - name: var-declaration
+        - name: var-naming
+
+    staticcheck:
+      checks:
+        - all
+
+    wrapcheck:
+      ignore-sigs:
+        - .Errorf(
+        - errors.New(
+        - errors.Join(
+        - errors.Unwrap(
+        - .Wrap(
+        - .Wrapf(
+
+  exclusions:
+    # Reuse maintained presets, but NOT "comments": this scaffold requires doc
+    # comments on exported symbols and packages (see AGENTS.md).
+    presets:
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      # Tests may use helpers and constructs that production code should avoid.
+      - path: _test\.go$
+        linters:
+          - dupword
+          - err113
+          - forcetypeassert
+          - gosec
+          - wrapcheck
+
+formatters:
+  enable:
+    - gci
+    - gofumpt
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - localmodule
+      custom-order: true
+    gofumpt:
+      extra-rules: true
+
+issues:
+  # Report every finding; a scaffold should never hide problems by default.
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  # New projects start clean, so there is no legacy debt to grandfather in.
+  new: false

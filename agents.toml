@@ -1,0 +1,13 @@
+version = 1
+agents = ["claude", "opencode"]
+
+[trust]
+allow_all = true
+
+[[skills]]
+name = "dotagents"
+source = "getsentry/dotagents"
+
+[[skills]]
+name = "*"
+source = "samber/cc-skills-golang"

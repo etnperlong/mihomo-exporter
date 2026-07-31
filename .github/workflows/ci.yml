@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: |
+            go.sum
+            tools/go.sum
+
+      - name: Download dependencies
+        run: |
+          go mod download
+          go mod download -modfile=tools/go.mod
+
+      - name: Check formatting
+        run: make fmt-check
+
+      - name: Check module tidiness
+        run: make tidy-check
+
+      - name: Lint
+        run: make lint
+
+      - name: Test with race detector
+        run: make test-race
+
+      - name: Build
+        run: make build
+
+  commit-lint:
+    name: Commit messages
+    runs-on: ubuntu-latest
+    # Commit message convention only applies to PR commits.
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # Exclude the CURRENT base tip, not the stale base.sha recorded when
+          # the PR opened. Otherwise merging an updated base branch pulls in
+          # third-party commits the author cannot rewrite.
+          # Capture separately so a rev-list failure is not swallowed by the
+          # subshell inside a here-string.
+          if ! shas="$(git rev-list --no-merges "origin/$BASE_REF..$HEAD_SHA")"; then
+            echo "::error::cannot determine the commit range to validate"
+            exit 1
+          fi
+
+          status=0
+          for sha in $shas; do
+            msg_file="$(mktemp)"
+            git log -1 --pretty=%B "$sha" > "$msg_file"
+            if ! .githooks/commit-msg "$msg_file"; then
+              echo "::error::invalid commit message in $sha"
+              status=1
+            fi
+            rm -f "$msg_file"
+          done
+          exit $status
+
+  security:
+    name: Security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: |
+            go.sum
+            tools/go.sum
+
+      - name: Download dependencies
+        run: |
+          go mod download
+          go mod download -modfile=tools/go.mod
+
+      - name: Scan for known vulnerabilities
+        run: make vuln

@@ -1,0 +1,116 @@
+#!/bin/sh
+# Validate Conventional Commits with a mandatory emoji prefix.
+# Enable with: make setup   (sets core.hooksPath to .githooks)
+#
+# Accepted header:
+#   <emoji> <type>[(scope)][!]: <description>
+# Also accepted:
+#   deps: ... / deps-dev: ...        (Dependabot)
+#   Merge ... / Revert ... / fixup!  (Git-generated)
+
+set -eu
+
+MSG_FILE="$1"
+
+# First non-comment, non-empty line is the header.
+HEADER="$(grep -v '^#' "$MSG_FILE" | grep -v '^[[:space:]]*$' | head -n 1 || true)"
+
+if [ -z "$HEADER" ]; then
+	echo "commit-msg: empty commit message" >&2
+	exit 1
+fi
+
+# Git-generated and bot headers bypass the emoji convention.
+# Dependabot uses `include: "scope"`, so it also emits `deps(gomod):` and
+# `deps-dev(github-actions):` — both scoped forms must be exempt.
+case "$HEADER" in
+Merge* | Revert* | "fixup!"* | "squash!"* | "amend!"* \
+	| deps:* | deps-dev:* | "deps("* | "deps-dev("*)
+	exit 0
+	;;
+esac
+
+TYPES='feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert'
+
+# Emoji required by type. Keep in sync with AGENTS.md and README.md.
+emoji_for_type() {
+	case "$1" in
+	feat) printf '%s' '✨' ;;
+	fix) printf '%s' '🐛' ;;
+	docs) printf '%s' '📚' ;;
+	style) printf '%s' '🎨' ;;
+	refactor) printf '%s' '🔨' ;;
+	perf) printf '%s' '📈' ;;
+	test) printf '%s' '🧪' ;;
+	build) printf '%s' '📦' ;;
+	ci) printf '%s' '👷' ;;
+	chore) printf '%s' '🔧' ;;
+	revert) printf '%s' '⏪' ;;
+	*) printf '%s' '' ;;
+	esac
+}
+
+fail() {
+	echo "commit-msg: $1" >&2
+	cat >&2 <<'USAGE'
+
+Required format:
+  <emoji> <type>[(scope)][!]: <description>
+
+Examples:
+  ✨ feat(greeting): support unicode names
+  🐛 fix: handle empty input
+  🔨 refactor(cmd)!: drop the legacy flag
+
+Type    Emoji     Type       Emoji
+feat    ✨        build      📦
+fix     🐛        ci         👷
+docs    📚        chore      🔧
+style   🎨        revert     ⏪
+refactor 🔨       perf       📈
+test    🧪
+
+Rules:
+  - description: imperative mood, lowercase, no trailing period
+  - header: 100 characters maximum
+USAGE
+	exit 1
+}
+
+# Structural check: <non-space prefix> <type>(scope)!: description
+if ! printf '%s' "$HEADER" |
+	grep -qE "^[^[:space:][:alnum:]]+ ($TYPES)(\([a-z0-9._/-]+\))?!?: .+$"; then
+	fail "header does not match '<emoji> <type>[(scope)][!]: <description>'
+  got: $HEADER"
+fi
+
+TYPE="$(printf '%s' "$HEADER" | sed -E "s/^[^[:space:]]+ (($TYPES)).*/\1/")"
+ACTUAL_EMOJI="$(printf '%s' "$HEADER" | cut -d' ' -f1)"
+EXPECTED_EMOJI="$(emoji_for_type "$TYPE")"
+
+if [ "$ACTUAL_EMOJI" != "$EXPECTED_EMOJI" ]; then
+	fail "type '$TYPE' requires the emoji '$EXPECTED_EMOJI', got '$ACTUAL_EMOJI'"
+fi
+
+# Header length: measured in characters, not bytes.
+HEADER_LEN="$(printf '%s' "$HEADER" | wc -m | tr -d '[:space:]')"
+if [ "$HEADER_LEN" -gt 100 ]; then
+	fail "header is $HEADER_LEN characters; maximum is 100"
+fi
+
+DESCRIPTION="$(printf '%s' "$HEADER" | sed -E 's/^.*!?: //')"
+
+case "$DESCRIPTION" in
+*.)
+	fail "description must not end with a period
+  got: $DESCRIPTION"
+	;;
+esac
+
+# Reject a capitalized first letter to keep descriptions lowercase.
+if printf '%s' "$DESCRIPTION" | grep -qE '^[A-Z][a-z]'; then
+	fail "description must start lowercase
+  got: $DESCRIPTION"
+fi
+
+exit 0
