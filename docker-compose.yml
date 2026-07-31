@@ -1,0 +1,12 @@
+services:
+  mihomo-exporter:
+    image: ghcr.io/etnperlong/mihomo-exporter:${MIHOMO_EXPORTER_TAG:-latest}
+    pull_policy: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: local
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ${MIHOMO_EXPORTER_CONFIG:-./config.yaml}:/etc/mihomo-exporter/config.yaml:ro

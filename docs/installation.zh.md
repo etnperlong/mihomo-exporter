@@ -30,6 +30,24 @@ docker run --rm --network host \
 
 `--network host` 是针对 Mihomo controller 监听在 `127.0.0.1` 的 Linux 示例。使用其他网络时，请将 `mihomo.api_url` 设为容器可访问的地址。普通的 `docker build .` 使用 Dockerfile 的 `local` stage 构建本地镜像。
 
+### Docker Compose
+
+[`docker-compose.yml`](../docker-compose.yml) 同时定义已发布的 GHCR 镜像和本地多阶段构建。默认的 `pull_policy: always` 会使 `docker compose up` 在启动前拉取 `ghcr.io/etnperlong/mihomo-exporter:${MIHOMO_EXPORTER_TAG:-latest}`，因此部署优先使用已发布镜像：
+
+```bash
+cp config.example.yaml config.yaml
+docker compose up -d
+```
+
+设置 `MIHOMO_EXPORTER_TAG` 可固定 release 版本，例如 `MIHOMO_EXPORTER_TAG=v1.2.3 docker compose up -d`。如需从当前检出的源码构建，请显式构建并在本次启动时禁止拉取：
+
+```bash
+docker compose build
+docker compose up -d --pull never
+```
+
+Compose 服务使用 host 网络，因此适用于 Mihomo 监听在 `127.0.0.1` 的 Linux 主机。若本地配置文件位于其他路径，请覆盖 `MIHOMO_EXPORTER_CONFIG`。
+
 ## OpenWRT
 
 将适用于当前 Linux 平台的 release 二进制安装到 `/usr/bin/mihomo-exporter`，然后安装随附的 `procd` 脚本和配置：

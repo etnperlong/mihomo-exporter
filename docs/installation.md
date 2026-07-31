@@ -30,6 +30,24 @@ docker run --rm --network host \
 
 `--network host` is a Linux example for a Mihomo controller listening on `127.0.0.1`. With other networking, set `mihomo.api_url` to an address reachable from the container. A plain `docker build .` produces a local image using the Dockerfile's `local` stage.
 
+### Docker Compose
+
+[`docker-compose.yml`](../docker-compose.yml) defines both the published GHCR image and a local multi-stage build. Its default `pull_policy: always` makes `docker compose up` pull `ghcr.io/etnperlong/mihomo-exporter:${MIHOMO_EXPORTER_TAG:-latest}` before starting, so deployment prefers the released image:
+
+```bash
+cp config.example.yaml config.yaml
+docker compose up -d
+```
+
+Set `MIHOMO_EXPORTER_TAG` to pin a release, for example `MIHOMO_EXPORTER_TAG=v1.2.3 docker compose up -d`. To build from the checked-out source instead, explicitly build and suppress the pull for that start:
+
+```bash
+docker compose build
+docker compose up -d --pull never
+```
+
+The Compose service uses host networking and therefore targets Linux hosts where Mihomo listens on `127.0.0.1`. Override `MIHOMO_EXPORTER_CONFIG` when the local configuration has a different path.
+
 ## OpenWRT
 
 Install the appropriate Linux release binary at `/usr/bin/mihomo-exporter`, then install the supplied `procd` script and configuration:
