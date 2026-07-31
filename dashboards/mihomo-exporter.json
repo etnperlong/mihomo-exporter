@@ -1,0 +1,220 @@
+{
+  "annotations": { "list": [] },
+  "description": "Availability, latency, provider health, and exporter health for mihomo-exporter.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "description": "High-level exporter, Mihomo, proxy availability, and latency status.",
+      "id": 1,
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Exporter Online",
+      "description": "Number of scrape targets currently reachable by Prometheus.",
+      "id": 2,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 0, "y": 1 },
+      "targets": [{ "refId": "A", "expr": "sum(up{job=~\"$job\", instance=~\"$instance\"})" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "auto", "colorMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Mihomo Reachable",
+      "description": "Number of exporters that connected to Mihomo during their latest fast probe.",
+      "id": 3,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 4, "y": 1 },
+      "targets": [{ "refId": "A", "expr": "sum(mihomo_up{instance=~\"$instance\"})" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "auto", "colorMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Monitored Proxies",
+      "description": "Total known proxies matching the selected exporter instances and providers.",
+      "id": 4,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 8, "y": 1 },
+      "targets": [{ "refId": "A", "expr": "count(mihomo_proxy_available{instance=~\"$instance\", provider=~\"$provider\"})" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "auto", "colorMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Available Proxies",
+      "description": "Currently available proxies matching the selected exporter instances and providers.",
+      "id": 5,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 12, "y": 1 },
+      "targets": [{ "refId": "A", "expr": "sum(mihomo_proxy_available{instance=~\"$instance\", provider=~\"$provider\"})" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "auto", "colorMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Overall Availability",
+      "description": "Percentage of selected proxies currently available.",
+      "id": 6,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 1 },
+      "targets": [{ "refId": "A", "expr": "avg(mihomo_proxy_available{instance=~\"$instance\", provider=~\"$provider\"}) * 100" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "color": { "mode": "palette-classic" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 80 }, { "color": "green", "value": 95 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "auto", "colorMode": "value" }
+    },
+    {
+      "type": "stat",
+      "title": "Median Latency",
+      "description": "Median successful proxy latency across the current selection.",
+      "id": 7,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 1 },
+      "targets": [{ "refId": "A", "expr": "quantile(0.5, mihomo_proxy_delay_milliseconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"})" }],
+      "fieldConfig": { "defaults": { "unit": "ms", "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "auto", "colorMode": "value" }
+    },
+    { "type": "row", "title": "Failure Focus", "description": "Unavailable, unreliable, and stale proxy data requiring attention.", "id": 8, "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 }, "panels": [] },
+    {
+      "type": "table",
+      "title": "Unavailable Proxies",
+      "description": "Proxies currently reporting unavailable, including their labels and last-probe data age.",
+      "id": 9,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
+      "targets": [{ "refId": "A", "expr": "mihomo_proxy_available{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"} == 0", "format": "table", "instant": true }, { "refId": "B", "expr": "time() - mihomo_proxy_last_probe_timestamp_seconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"}", "format": "table", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "mappings": [{ "type": "value", "options": { "0": { "text": "Unavailable", "color": "red" } } }] }, "overrides": [] },
+      "options": { "showHeader": true, "footer": { "show": false } }
+    },
+    {
+      "type": "bargauge",
+      "title": "Lowest 24h Availability Top 20",
+      "description": "Twenty proxies with the lowest availability percentage over the last 24 hours.",
+      "id": 10,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 7 },
+      "targets": [{ "refId": "A", "expr": "bottomk(20, avg_over_time(mihomo_proxy_available{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"}[24h]) * 100)", "instant": true }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "type": "stat",
+      "title": "Stale Proxy Data",
+      "description": "Number of selected proxies whose latest delay probe is more than five minutes old.",
+      "id": 11,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 7 },
+      "targets": [{ "refId": "A", "expr": "count(time() - mihomo_proxy_last_probe_timestamp_seconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"} > 300)" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "auto", "colorMode": "value" }
+    },
+    {
+      "type": "table",
+      "title": "Unstable Proxies",
+      "description": "The 20 proxies with the most availability state changes during the last six hours.",
+      "id": 12,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 11 },
+      "targets": [{ "refId": "A", "expr": "topk(20, changes(mihomo_proxy_available{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"}[6h]))", "format": "table", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "showHeader": true, "footer": { "show": false } }
+    },
+    { "type": "row", "title": "Latency", "description": "Successful proxy latency trends, distribution, and extremes.", "id": 13, "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 }, "panels": [] },
+    {
+      "type": "timeseries", "title": "Proxy Latency", "description": "Successful latency measurements by proxy name.", "id": 14,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 9, "w": 12, "x": 0, "y": 16 },
+      "targets": [{ "refId": "A", "expr": "mihomo_proxy_delay_milliseconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"}", "legendFormat": "{{name}}" }],
+      "fieldConfig": { "defaults": { "unit": "ms", "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "mean", "max"] }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "timeseries", "title": "Latency Quantiles", "description": "P50, P90, and P99 successful latency across selected proxies.", "id": 15,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 9, "w": 12, "x": 12, "y": 16 },
+      "targets": [{ "refId": "A", "expr": "quantile(0.5, mihomo_proxy_delay_milliseconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"})", "legendFormat": "p50" }, { "refId": "B", "expr": "quantile(0.9, mihomo_proxy_delay_milliseconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"})", "legendFormat": "p90" }, { "refId": "C", "expr": "quantile(0.99, mihomo_proxy_delay_milliseconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"})", "legendFormat": "p99" }],
+      "fieldConfig": { "defaults": { "unit": "ms", "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "mean", "max"] }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "heatmap", "title": "Latency Heatmap", "description": "Distribution of successful proxy latency measurements.", "id": 16,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 8, "w": 12, "x": 0, "y": 25 },
+      "targets": [{ "refId": "A", "expr": "mihomo_proxy_delay_milliseconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"}" }],
+      "fieldConfig": { "defaults": { "unit": "ms", "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "calculate": false, "legend": { "show": true }, "tooltip": { "show": true } }
+    },
+    {
+      "type": "bargauge", "title": "Fastest and Slowest Proxies", "description": "Ten fastest and ten slowest successful proxy latency measurements.", "id": 17,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 8, "w": 12, "x": 12, "y": 25 },
+      "targets": [{ "refId": "A", "expr": "bottomk(10, mihomo_proxy_delay_milliseconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"})", "instant": true, "legendFormat": "fast {{name}}" }, { "refId": "B", "expr": "topk(10, mihomo_proxy_delay_milliseconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"})", "instant": true, "legendFormat": "slow {{name}}" }],
+      "fieldConfig": { "defaults": { "unit": "ms", "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    { "type": "row", "title": "Providers", "description": "Availability, size, latency, update time, and health checks by subscription provider.", "id": 18, "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 33 }, "panels": [] },
+    {
+      "type": "bargauge", "title": "Provider Availability", "description": "Current availability percentage for each selected provider.", "id": 19,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 7, "w": 8, "x": 0, "y": 34 },
+      "targets": [{ "refId": "A", "expr": "mihomo_provider_proxy_available_count{instance=~\"$instance\", provider=~\"$provider\"} / mihomo_provider_proxy_count{instance=~\"$instance\", provider=~\"$provider\"} * 100", "instant": true }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "type": "stat", "title": "Provider Proxy Count", "description": "Number of proxies in each selected provider.", "id": 20,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 7, "w": 4, "x": 8, "y": 34 }, "repeat": "provider", "repeatDirection": "h",
+      "targets": [{ "refId": "A", "expr": "mihomo_provider_proxy_count{instance=~\"$instance\", provider=~\"$provider\"}" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "auto", "colorMode": "value" }
+    },
+    {
+      "type": "timeseries", "title": "Provider Median Latency", "description": "Median successful latency grouped by provider.", "id": 21,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 7, "w": 12, "x": 12, "y": 34 },
+      "targets": [{ "refId": "A", "expr": "quantile by (provider) (0.5, mihomo_proxy_delay_milliseconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"})", "legendFormat": "{{provider}}" }],
+      "fieldConfig": { "defaults": { "unit": "ms", "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "mean", "max"] }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "table", "title": "Provider Subscription Updates", "description": "Last provider subscription update timestamp.", "id": 22,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 7, "w": 12, "x": 0, "y": 41 },
+      "targets": [{ "refId": "A", "expr": "mihomo_provider_updated_timestamp_seconds{instance=~\"$instance\", provider=~\"$provider\"}", "format": "table", "instant": true }],
+      "fieldConfig": { "defaults": { "unit": "dateTimeFromNow", "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "showHeader": true, "footer": { "show": false } }
+    },
+    {
+      "type": "timeseries", "title": "Provider Health Check Duration", "description": "Duration of each provider's most recent health check.", "id": 23,
+      "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 7, "w": 12, "x": 12, "y": 41 },
+      "targets": [{ "refId": "A", "expr": "mihomo_provider_healthcheck_duration_seconds{instance=~\"$instance\", provider=~\"$provider\"}", "legendFormat": "{{provider}}" }],
+      "fieldConfig": { "defaults": { "unit": "s", "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "mean", "max"] }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "row", "title": "Proxy Types", "description": "Distribution, availability, and latency grouped by proxy protocol type.", "id": 24, "collapsed": true, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 48 },
+      "panels": [
+        { "type": "piechart", "title": "Proxy Type Distribution", "description": "Count of selected proxies grouped by Mihomo proxy type.", "id": 25, "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 8, "w": 8, "x": 0, "y": 49 }, "targets": [{ "refId": "A", "expr": "count by (type) (mihomo_proxy_available{instance=~\"$instance\", provider=~\"$provider\"})", "instant": true }], "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }, "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } } },
+        { "type": "bargauge", "title": "Availability by Proxy Type", "description": "Current availability percentage grouped by Mihomo proxy type.", "id": 26, "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 8, "w": 8, "x": 8, "y": 49 }, "targets": [{ "refId": "A", "expr": "avg by (type) (mihomo_proxy_available{instance=~\"$instance\", provider=~\"$provider\"}) * 100", "instant": true }], "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true, "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } } },
+        { "type": "timeseries", "title": "Median Latency by Proxy Type", "description": "Median successful latency grouped by Mihomo proxy type.", "id": 27, "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 8, "w": 8, "x": 16, "y": 49 }, "targets": [{ "refId": "A", "expr": "quantile by (type) (0.5, mihomo_proxy_delay_milliseconds{instance=~\"$instance\", provider=~\"$provider\", type=~\"$proxy_type\"})", "legendFormat": "{{type}}" }], "fieldConfig": { "defaults": { "unit": "ms", "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "mean", "max"] }, "tooltip": { "mode": "multi" } } }
+      ]
+    },
+    {
+      "type": "row", "title": "Exporter Self-Monitoring", "description": "Probe-loop performance, error signals, fallback usage, and build metadata.", "id": 28, "collapsed": true, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 49 },
+      "panels": [
+        { "type": "timeseries", "title": "Probe Health", "description": "Probe duration, scrape error rate, fallback probe rate, and unknown proxy type rate.", "id": 29, "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 9, "w": 16, "x": 0, "y": 50 }, "targets": [{ "refId": "A", "expr": "mihomo_exporter_probe_duration_seconds{instance=~\"$instance\"}", "legendFormat": "duration {{loop}}" }, { "refId": "B", "expr": "rate(mihomo_exporter_scrape_errors_total{instance=~\"$instance\"}[5m])", "legendFormat": "errors {{collector}}" }, { "refId": "C", "expr": "rate(mihomo_exporter_probe_fallback_total{instance=~\"$instance\"}[5m])", "legendFormat": "fallback" }, { "refId": "D", "expr": "rate(mihomo_exporter_unknown_proxy_type_total{instance=~\"$instance\"}[5m])", "legendFormat": "unknown {{type}}" }], "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "mean", "max"] }, "tooltip": { "mode": "multi" } } },
+        { "type": "table", "title": "Version Information", "description": "Mihomo and exporter version labels reported by the selected instances.", "id": 30, "datasource": { "type": "prometheus", "uid": "${datasource}" }, "gridPos": { "h": 9, "w": 8, "x": 16, "y": 50 }, "targets": [{ "refId": "A", "expr": "mihomo_version_info{instance=~\"$instance\"}", "format": "table", "instant": true }, { "refId": "B", "expr": "mihomo_exporter_build_info{instance=~\"$instance\"}", "format": "table", "instant": true }], "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] }, "options": { "showHeader": true, "footer": { "show": false } } }
+      ]
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "tags": ["mihomo", "prometheus", "exporter"],
+  "templating": {
+    "list": [
+      { "name": "datasource", "label": "Data source", "type": "datasource", "query": "prometheus", "current": {}, "hide": 0, "includeAll": false, "multi": false, "refresh": 1 },
+      { "name": "job", "label": "Job", "type": "query", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "definition": "label_values(up, job)", "query": { "query": "label_values(up, job)", "refId": "StandardVariableQuery" }, "current": { "text": "mihomo-exporter", "value": "mihomo-exporter" }, "hide": 2, "includeAll": false, "multi": false, "refresh": 1 },
+      { "name": "instance", "label": "Instance", "type": "query", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "definition": "label_values(mihomo_up, instance)", "query": { "query": "label_values(mihomo_up, instance)", "refId": "StandardVariableQuery" }, "current": {}, "hide": 0, "includeAll": true, "allValue": ".*", "multi": true, "refresh": 1 },
+      { "name": "provider", "label": "Provider", "type": "query", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "definition": "label_values(mihomo_proxy_available{instance=~\"$instance\"}, provider)", "query": { "query": "label_values(mihomo_proxy_available{instance=~\"$instance\"}, provider)", "refId": "StandardVariableQuery" }, "current": {}, "hide": 0, "includeAll": true, "allValue": ".*", "multi": true, "refresh": 1 },
+      { "name": "proxy_type", "label": "Proxy type", "type": "query", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "definition": "label_values(mihomo_proxy_available{instance=~\"$instance\"}, type)", "query": { "query": "label_values(mihomo_proxy_available{instance=~\"$instance\"}, type)", "refId": "StandardVariableQuery" }, "current": {}, "hide": 0, "includeAll": true, "allValue": ".*", "multi": true, "refresh": 1 }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "browser",
+  "title": "Mihomo Exporter",
+  "uid": null,
+  "version": 1,
+  "weekStart": ""
+}

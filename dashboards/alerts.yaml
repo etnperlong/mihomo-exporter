@@ -1,0 +1,51 @@
+groups:
+  - name: mihomo-exporter
+    rules:
+      - alert: MihomoExporterDown
+        expr: up{job="mihomo-exporter"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Mihomo exporter is down
+          description: Prometheus cannot scrape the Mihomo exporter on {{ $labels.instance }}.
+      - alert: MihomoUnreachable
+        expr: mihomo_up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Mihomo is unreachable
+          description: The exporter on {{ $labels.instance }} cannot connect to Mihomo.
+      - alert: MihomoProxyDown
+        expr: mihomo_proxy_available == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Mihomo proxy is unavailable
+          description: Proxy {{ $labels.name }} in provider {{ $labels.provider }} has been unavailable for 10 minutes.
+      - alert: MihomoProviderAllDown
+        expr: mihomo_provider_proxy_available_count == 0 and mihomo_provider_proxy_count > 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: All proxies in a Mihomo provider are down
+          description: Provider {{ $labels.provider }} has no available proxies.
+      - alert: MihomoProxyMetricsAbsent
+        expr: absent_over_time(mihomo_proxy_available[10m])
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Mihomo proxy metrics are absent
+          description: No mihomo_proxy_available samples have been received for 10 minutes.
+      - alert: MihomoProbeStalled
+        expr: time() - mihomo_exporter_last_success_timestamp_seconds{loop="slow"} > 300
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Mihomo slow probe is stalled
+          description: The slow probe loop on {{ $labels.instance }} has not succeeded for over five minutes.
