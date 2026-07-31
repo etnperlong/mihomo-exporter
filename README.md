@@ -29,6 +29,14 @@ Metrics are available at `http://127.0.0.1:9878/metrics`. When Mihomo uses `secr
 - [Grafana dashboard and alerts](docs/dashboards.md)
 - [Example configuration](config.example.yaml)
 
+## Acknowledgements
+
+Thank you to the maintainers of
+[`clash_exporter`](https://github.com/elonzh/clash_exporter) and
+[`mihomo-prometheus-exporter`](https://github.com/WhereAreBugs/mihomo-prometheus-exporter)
+for their work on proxy metrics, provider health checks, and exporter
+architecture.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

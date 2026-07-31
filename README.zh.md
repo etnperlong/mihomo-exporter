@@ -29,6 +29,12 @@
 - [Grafana dashboard 与告警](docs/dashboards.zh.md)
 - [配置示例](config.example.yaml)
 
+## 鸣谢
+
+感谢 [`clash_exporter`](https://github.com/elonzh/clash_exporter) 和
+[`mihomo-prometheus-exporter`](https://github.com/WhereAreBugs/mihomo-prometheus-exporter)
+的维护者在代理指标、Provider 健康检查和 exporter 架构方面的工作。
+
 ## 许可证
 
 MIT。参见 [LICENSE](LICENSE)。
