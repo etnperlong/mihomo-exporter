@@ -11,6 +11,7 @@ require (
 	github.com/knadh/koanf/v2 v2.3.5
 	github.com/spf13/pflag v1.0.10
 	go.uber.org/zap v1.28.0
+	golang.org/x/term v0.45.0
 )
 
 require (
@@ -21,5 +22,5 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 )
