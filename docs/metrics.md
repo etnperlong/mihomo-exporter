@@ -65,3 +65,5 @@ prometheus.scrape "mihomo_exporter" {
 ```
 
 If `web.telemetry_path` is not `/metrics`, add `metrics_path = "/your-path"`. Configure the remote-write destination independently according to the target service.
+
+For a complete Prometheus or Alloy setup that sends these metrics to Grafana Cloud, see [Grafana Cloud Integration](grafana-cloud.md).

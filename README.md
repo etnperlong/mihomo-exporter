@@ -26,6 +26,7 @@ Metrics are available at `http://127.0.0.1:9878/metrics`. When Mihomo uses `secr
 - [Installation and deployment](docs/installation.md)
 - [Configuration reference](docs/configuration.md)
 - [Metrics and scraping](docs/metrics.md)
+- [Grafana Cloud integration](docs/grafana-cloud.md)
 - [Grafana dashboard and alerts](docs/dashboards.md)
 - [Example configuration](config.example.yaml)
 

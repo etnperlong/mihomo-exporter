@@ -26,6 +26,7 @@
 - [安装与部署](docs/installation.zh.md)
 - [配置参考](docs/configuration.zh.md)
 - [指标与抓取](docs/metrics.zh.md)
+- [Grafana Cloud 集成](docs/grafana-cloud.zh.md)
 - [Grafana dashboard 与告警](docs/dashboards.zh.md)
 - [配置示例](config.example.yaml)
 
